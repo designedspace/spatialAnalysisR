@@ -19,6 +19,12 @@ counties <- counties[,-c(1:3,6:17)]
 # tracts <- tracts[,-c(1:3,6:17)]
 countiesPop <- read.csv("../Data/Tabular/pop2012.csv", header = TRUE)
 
+nonContig <- c("03","07","14","64","15","60","02","81","64","84","86","67","89","68","71","76","69","70","95","43","72","74","52","78","79")
+
+for (i in nonContig) {
+  counties <- counties[substr(counties@data$GEOID10,1,2) != i,]
+}
+
 for(i in 1:length(countiesPop$geoid)) {
   if (nchar(countiesPop$geoid[i]) < max(nchar(countiesPop$geoid))) {
     countiesPop$geoid[i] <- paste("0",toString(countiesPop$geoid[i]),sep="")
@@ -53,6 +59,7 @@ coord2Pt <- function(coordsCSV, outFol, outName, proj, duplicate.del) {
 }
 
 tweets <- coord2Pt(coords2012,outFol,out2012,proj,duplicate.del=TRUE)
+
 counties$tweets <- sapply(over(counties,as(tweets,"SpatialPoints"),returnList=TRUE), length)
 
 counties@data$poplog <- log10(counties$pop+1)
