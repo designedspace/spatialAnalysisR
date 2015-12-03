@@ -14,8 +14,9 @@ out2012 <- "tweets2012"
 # out2015 <- "tweets2015"
 
 counties <- readOGR("../Data/Spatial","USCounties2010")
+tracts <- readOGR("C:/Users/emhun/Desktop/Tweets_GWR/Data/Spatial","TractsPop")
 counties <- counties[,-c(1:3,6:17)]
-
+# tracts <- tracts[,-c(1:3,6:17)]
 countiesPop <- read.csv("../Data/Tabular/pop2012.csv", header = TRUE)
 
 for(i in 1:length(countiesPop$geoid)) {
@@ -54,17 +55,13 @@ coord2Pt <- function(coordsCSV, outFol, outName, proj, duplicate.del) {
 tweets <- coord2Pt(coords2012,outFol,out2012,proj,duplicate.del=TRUE)
 counties$tweets <- sapply(over(counties,as(tweets,"SpatialPoints"),returnList=TRUE), length)
 
-# Tweets2012 <- coord2Pt(coords2012,outFol,out2012,proj,duplicate.del=TRUE)
-# Tweets2015 <- coord2Pt(coords2015,outFol,out2015,proj,duplicate.del=TRUE)
-# TweetsTot <- spRbind(Tweets2012,Tweets2015)
-
-# tracts <- readOGR("C:/Users/Eric/Desktop/Tracts","Tracts2010")
-
-# tracts$Twt2012 <- sapply(over(tracts,as(Tweets2012,"SpatialPoints"),returnList=TRUE), length)
-# tracts$Twt2015 <- sapply(over(tracts,as(Tweets2015,"SpatialPoints"),returnList=TRUE), length)
-# tracts$TwtTot <- sapply(over(tracts,as(TweetsTot,"SpatialPoints"),returnList=TRUE), length)
-
 counties@data$poplog <- log10(counties$pop+1)
 counties@data$tweetsLog <- log10(counties$tweets+1)
 
+tracts$tweets <- sapply(over(tracts,as(tweets,"SpatialPoints"),returnList=TRUE), length)
+
+tracts@data$poplog <- log10(tracts$pop+1)
+tracts@data$tweetsLog <- log10(tracts$tweets+1)
+
 writeOGR(counties, "../Data/Spatial", "countiesTwt", driver="ESRI Shapefile", overwrite_layer=TRUE)
+writeOGR(tracts, "../Data/Spatial", "tractsTwt", driver="ESRI Shapefile", overwrite_layer=TRUE)
